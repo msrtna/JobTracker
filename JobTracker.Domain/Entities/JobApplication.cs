@@ -1,4 +1,5 @@
-﻿using JobTracker.Domain.Enums;
+﻿using JobTracker.Domain.Common;
+using JobTracker.Domain.Enums;
 
 namespace JobTracker.Domain.Entities
 {
@@ -15,5 +16,10 @@ namespace JobTracker.Domain.Entities
         public DateTime? ApplicationDate { get; set; }
         public JobApplicationStatus Status { get; set; }
         public string? Description { get; set; }
+
+        public ICollection<Interview> Interviews { get; set; } = new List<Interview>();
+        public User User { get; set; } = null!;
+        public Company Company { get; set; } = null!;
+        public JobCategory JobCategory { get; set; } = null!;
     }
 }

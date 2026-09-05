@@ -1,4 +1,4 @@
-﻿namespace JobTracker.Domain
+﻿namespace JobTracker.Domain.Common
 {
     public abstract class BaseEntity
     {
