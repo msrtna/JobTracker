@@ -7,7 +7,7 @@ namespace JobTracker.Application.Interfaces
         Task<List<CompanyDto>> GetAllAsync();
         Task<CompanyDto?> GetByIdAsync(long id);
         Task<CompanyDto> CreateAsync(CreateCompanyDto dto);
-        Task<bool> UpdateAsync(long id, UpdateCompanyDto dto);
-        Task<bool> DeleteAsync(long id);
+        Task UpdateAsync(long id, UpdateCompanyDto dto);
+        Task DeleteAsync(long id);
     }
 }

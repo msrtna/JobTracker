@@ -42,5 +42,15 @@ namespace JobTracker.Infrastructure.Repositories
             _context.Companies.Remove(company);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<bool> ExistsByNameAsync(string name, long? excludeId = null)
+        {
+            return await _context.Companies.AnyAsync(n => n.Name == name && (n.Id != excludeId || excludeId == null));
+        }
+
+        public async Task<bool> ExistsByWebsiteAsync(string website, long? excludeId = null)
+        {
+            return await _context.Companies.AnyAsync(n => n.Website == website && (n.Id != excludeId || excludeId == null));
+        }
     }
 }

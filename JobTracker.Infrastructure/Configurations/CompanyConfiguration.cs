@@ -23,6 +23,9 @@ namespace JobTracker.Infrastructure.Configurations
                 .HasMaxLength(500)
                 .IsRequired();
 
+            builder.HasIndex(x => x.Website)
+                .IsUnique();
+
             builder.Property(x => x.Location)
                 .HasMaxLength(200);
 

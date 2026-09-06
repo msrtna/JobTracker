@@ -26,8 +26,6 @@ namespace JobTracker.Api.Controllers
         public async Task<IActionResult> GetById(long id)
         {
             var company = await _companyService.GetByIdAsync(id);
-            if (company == null)
-                return NotFound();
             return Ok(company);
         }
 
@@ -44,18 +42,14 @@ namespace JobTracker.Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAsync(long id, [FromBody] UpdateCompanyDto dto)
         {
-            var company = await _companyService.UpdateAsync(id, dto);
-            if (!company)
-                return NotFound();
+            await _companyService.UpdateAsync(id, dto);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAsync(long id)
         {
-            var company = await _companyService.DeleteAsync(id);
-            if (!company)
-                return NotFound();
+            await _companyService.DeleteAsync(id);
             return NoContent();
         }
     }

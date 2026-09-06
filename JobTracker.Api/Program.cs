@@ -1,4 +1,5 @@
 using FluentValidation.AspNetCore;
+using JobTracker.Api.Middleware;
 using JobTracker.Application;
 using JobTracker.Infrastructure;
 
@@ -21,8 +22,6 @@ namespace JobTracker.Api
 
 
 
-
-
             // Add services to the container.
 
             builder.Services.AddControllers();
@@ -41,11 +40,15 @@ namespace JobTracker.Api
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+
                 app.MapOpenApi();
             }
 
+            app.UseMiddleware<GlobalExceptionMiddleware>();
             app.UseHttpsRedirection();
-
+            app.UseAuthentication();
             app.UseAuthorization();
 
 
