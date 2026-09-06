@@ -1,3 +1,4 @@
+using FluentValidation.AspNetCore;
 using JobTracker.Application;
 using JobTracker.Infrastructure;
 
@@ -19,13 +20,23 @@ namespace JobTracker.Api
             builder.Services.AddApplication();
 
 
+
+
+
             // Add services to the container.
 
             builder.Services.AddControllers();
 
+            builder.Services.AddFluentValidationAutoValidation();
+            builder.Services.AddSwaggerGen();
+
+
             builder.Services.AddOpenApi();
 
             var app = builder.Build();
+
+
+
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
