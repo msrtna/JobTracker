@@ -1,3 +1,4 @@
+using JobTracker.Application;
 using JobTracker.Infrastructure;
 
 namespace JobTracker.Api
@@ -9,11 +10,13 @@ namespace JobTracker.Api
             var builder = WebApplication.CreateBuilder(args);
 
             // ============================================================
-            // Infrastructure
+            // Infrastructure and Application
             // ============================================================
 
             builder.Services.AddInfrastructure(
                 builder.Configuration);
+
+            builder.Services.AddApplication();
 
 
             // Add services to the container.

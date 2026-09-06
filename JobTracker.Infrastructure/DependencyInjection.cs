@@ -1,4 +1,6 @@
-﻿using JobTracker.Infrastructure.Persistence.Context;
+﻿using JobTracker.Application.Interfaces;
+using JobTracker.Infrastructure.Persistence.Context;
+using JobTracker.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,7 +19,8 @@ namespace JobTracker.Infrastructure
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
             });
 
-
+            // Company
+            services.AddScoped<ICompanyRepository, CompanyRepository>();
 
 
             return services;
