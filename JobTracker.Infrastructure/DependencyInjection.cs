@@ -19,8 +19,10 @@ namespace JobTracker.Infrastructure
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
             });
 
-            // Company
+
+            // Repositories
             services.AddScoped<ICompanyRepository, CompanyRepository>();
+            services.AddScoped<IJobCategoryRepository, JobCategoryRepository>();
 
 
             return services;

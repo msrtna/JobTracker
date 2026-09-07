@@ -22,7 +22,7 @@ namespace JobTracker.Application
 
             // Services
             services.AddScoped<ICompanyService, CompanyService>();
-
+            services.AddScoped<IJobCategoryService, JobCategoryService>();
 
 
             return services;
