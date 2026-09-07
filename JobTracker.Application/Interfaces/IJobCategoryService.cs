@@ -1,5 +1,4 @@
-﻿using JobTracker.Application.DTOs.CompanyDtos;
-using JobTracker.Application.DTOs.JobCategoryDtos;
+﻿using JobTracker.Application.DTOs.JobCategoryDtos;
 
 namespace JobTracker.Application.Interfaces
 {
