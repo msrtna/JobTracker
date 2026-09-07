@@ -23,6 +23,7 @@ namespace JobTracker.Infrastructure
             // Repositories
             services.AddScoped<ICompanyRepository, CompanyRepository>();
             services.AddScoped<IJobCategoryRepository, JobCategoryRepository>();
+            services.AddScoped<IInterviewRepository, InterviewRepository>();
 
 
             return services;
