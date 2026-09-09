@@ -1,6 +1,7 @@
 ﻿using JobTracker.Application.Interfaces;
 using JobTracker.Infrastructure.Persistence.Context;
 using JobTracker.Infrastructure.Repositories;
+using JobTracker.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +27,8 @@ namespace JobTracker.Infrastructure
             services.AddScoped<IInterviewRepository, InterviewRepository>();
             services.AddScoped<IJobApplicationRepository, JobApplicationRepository>();
 
+            // Password Hash
+            services.AddScoped<IPasswordHasher, PasswordHasherService>();
 
             return services;
         }
