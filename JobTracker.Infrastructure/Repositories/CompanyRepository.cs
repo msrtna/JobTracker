@@ -52,5 +52,10 @@ namespace JobTracker.Infrastructure.Repositories
         {
             return await _context.Companies.AnyAsync(n => n.Website == website && (n.Id != excludeId || excludeId == null));
         }
+
+        public async Task<bool> ExistsAsync(long id)
+        {
+            return await _context.Companies.AnyAsync(a => a.Id == id);
+        }
     }
 }

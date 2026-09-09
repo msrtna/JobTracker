@@ -10,11 +10,13 @@ namespace JobTracker.Application.Services
     {
         private readonly IInterviewRepository _repository;
         private readonly IMapper _mapper;
+        private readonly IJobApplicationRepository _jobApplicationRepository;
 
-        public InterviewService(IInterviewRepository repository, IMapper mapper)
+        public InterviewService(IInterviewRepository repository,  IMapper mapper, IJobApplicationRepository jobApplicationRepository)
         {
             _repository = repository;
             _mapper = mapper;
+            _jobApplicationRepository = jobApplicationRepository;
         }
 
 
@@ -34,6 +36,9 @@ namespace JobTracker.Application.Services
 
         public async Task<InterviewDto> CreateAsync(CreateInterviewDto dto)
         {
+            if (!await _jobApplicationRepository.ExistsAsync(dto.JobApplicationId))
+                throw new NotFoundException($"Job application with id {dto.JobApplicationId} was not found.");
+
             var result = _mapper.Map<Interview>(dto);
             await _repository.CreateAsync(result);
             return _mapper.Map<InterviewDto>(result);
@@ -45,6 +50,8 @@ namespace JobTracker.Application.Services
 
             if (result == null)
                 throw new NotFoundException($"Interview with id {id} was not found.");
+            if (!await _jobApplicationRepository.ExistsAsync(dto.JobApplicationId))
+                throw new NotFoundException($"Job application with id {dto.JobApplicationId} was not found.");
 
             _mapper.Map(dto, result);
             await _repository.UpdateAsync(result);

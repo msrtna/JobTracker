@@ -9,6 +9,7 @@ namespace JobTracker.Application.Interfaces
         Task CreateAsync(JobCategory jobCategory);
         Task UpdateAsync(JobCategory jobCategory);
         Task DeleteAsync(JobCategory jobCategory);
+        Task<bool> ExistsAsync(long id);
         Task<bool> ExistsByNameAsync(string name, long? excludeId = null);
     }
 }

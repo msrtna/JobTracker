@@ -9,6 +9,7 @@ namespace JobTracker.Application.Interfaces
         Task CreateAsync(Company company);
         Task UpdateAsync(Company company);
         Task DeleteAsync(Company company);
+        Task<bool> ExistsAsync(long id);
         Task<bool> ExistsByNameAsync(string name, long? excludeId = null);
         Task<bool> ExistsByWebsiteAsync(string website, long? excludeId = null);
     }
