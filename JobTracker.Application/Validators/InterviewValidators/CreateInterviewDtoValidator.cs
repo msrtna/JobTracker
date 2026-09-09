@@ -16,8 +16,8 @@ namespace JobTracker.Application.Validators.InterviewValidators
                 .WithMessage("Interview date is required.");
 
             RuleFor(x => x.InterviewType)
-                .NotEmpty()
-                .WithMessage("Interview type is required.");
+                .IsInEnum()
+                .WithMessage("Invalid interview type.");
 
             RuleFor(x => x.Notes)
                 .MaximumLength(200)
