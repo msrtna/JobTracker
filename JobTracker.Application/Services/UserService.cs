@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using JobTracker.Application.DTOs.AuthDtos.LoginDtos;
 using JobTracker.Application.DTOs.AuthDtos.RegisterDtos;
 using JobTracker.Application.DTOs.AuthDtos.UserDtos;
 using JobTracker.Application.Exceptions;
@@ -35,6 +36,11 @@ namespace JobTracker.Application.Services
 
             await _repository.CreateAsync(user);
             return _mapper.Map<UserDto>(user);
+        }
+
+        public Task<LoginResponseDto> LoginAsync(LoginDto dto)
+        {
+            throw new NotImplementedException();
         }
     }
 }

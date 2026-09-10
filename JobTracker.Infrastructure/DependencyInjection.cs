@@ -31,6 +31,10 @@ namespace JobTracker.Infrastructure
             // Password Hash
             services.AddScoped<IPasswordHasher, PasswordHasherService>();
 
+            // JWT
+            services.AddScoped<IJwtService, JwtService>();
+
+
             return services;
         }
     }

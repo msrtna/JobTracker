@@ -25,7 +25,7 @@ namespace JobTracker.Application.Validators.RegisterValidator
                     .MaximumLength(100)
                     .WithMessage("Email cannot exceed 100 characters.")
                     .EmailAddress()
-                    .WithMessage("Invalid email address."); ;
+                    .WithMessage("Invalid email address.");
 
             RuleFor(x => x.Password)
                     .NotEmpty()
@@ -33,7 +33,7 @@ namespace JobTracker.Application.Validators.RegisterValidator
                     .MaximumLength(100)
                     .WithMessage("Password cannot exceed 100 characters.")
                     .MinimumLength(8)
-                    .WithMessage("Password must be at least 8 characters long."); ;
+                    .WithMessage("Password must be at least 8 characters long.");
         }
     }
 }
