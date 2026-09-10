@@ -26,6 +26,7 @@ namespace JobTracker.Infrastructure
             services.AddScoped<IJobCategoryRepository, JobCategoryRepository>();
             services.AddScoped<IInterviewRepository, InterviewRepository>();
             services.AddScoped<IJobApplicationRepository, JobApplicationRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
 
             // Password Hash
             services.AddScoped<IPasswordHasher, PasswordHasherService>();
