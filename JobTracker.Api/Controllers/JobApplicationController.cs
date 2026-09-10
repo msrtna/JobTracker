@@ -1,11 +1,13 @@
 ﻿using JobTracker.Application.DTOs.JobApplicationDtos;
 using JobTracker.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JobTracker.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class JobApplicationController : ControllerBase
     {
         private readonly IJobApplicationService _service;

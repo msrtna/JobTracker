@@ -13,12 +13,14 @@ namespace JobTracker.Application.Services
         private readonly IUserRepository _repository;
         private readonly IMapper _mapper;
         private readonly IPasswordHasher _passwordHasher;
+        private readonly IJwtService _jwtService;
 
-        public UserService(IUserRepository repository, IMapper mapper, IPasswordHasher passwordHasher)
+        public UserService(IUserRepository repository, IMapper mapper, IPasswordHasher passwordHasher, IJwtService jwtService)
         {
             _repository = repository;
             _mapper = mapper;
             _passwordHasher = passwordHasher;
+            _jwtService = jwtService;
         }
 
 
@@ -38,9 +40,39 @@ namespace JobTracker.Application.Services
             return _mapper.Map<UserDto>(user);
         }
 
-        public Task<LoginResponseDto> LoginAsync(LoginDto dto)
+        public async Task<LoginResponseDto> LoginAsync(LoginDto dto)
         {
-            throw new NotImplementedException();
+            var user = await _repository.GetByEmailAsync(dto.Email);
+
+            if (user == null)
+            {
+                throw new UnauthorizedException(
+                    "Invalid email or password.");
+            }
+
+            var isPasswordValid =
+                _passwordHasher.VerifyPassword(
+                    dto.Password,
+                    user.PasswordHash);
+
+            if (!isPasswordValid)
+            {
+                throw new UnauthorizedException(
+                    "Invalid email or password.");
+            }
+
+            var token = _jwtService.GenerateToken(
+                user.Id,
+                user.Email);
+
+            var expiration = _jwtService.GetExpiration();
+
+            return new LoginResponseDto
+            {
+                Token = token,
+                ExpiresAt = expiration,
+                User = _mapper.Map<UserDto>(user)
+            };
         }
     }
 }

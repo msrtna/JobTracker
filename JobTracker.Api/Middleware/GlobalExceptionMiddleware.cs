@@ -37,6 +37,14 @@ namespace JobTracker.Api.Middleware
                     ex.Message
                     );
             }
+            catch (UnauthorizedException ex)
+            {
+                await HandleExceptionAsync(
+                    context,
+                    HttpStatusCode.Unauthorized,
+                    ex.Message
+                    );
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unexpected error occurred.");
