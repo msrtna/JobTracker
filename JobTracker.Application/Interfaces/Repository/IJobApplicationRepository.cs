@@ -1,6 +1,6 @@
 ﻿using JobTracker.Domain.Entities;
 
-namespace JobTracker.Application.Interfaces
+namespace JobTracker.Application.Interfaces.Repository
 {
     public interface IJobApplicationRepository
     {
@@ -10,5 +10,6 @@ namespace JobTracker.Application.Interfaces
         Task UpdateAsync(JobApplication jobApplication);
         Task DeleteAsync(JobApplication jobApplication);
         Task<bool> ExistsAsync(long id);
+        Task<List<JobApplication>> GetAllByUserIdAsync(long userId);
     }
 }

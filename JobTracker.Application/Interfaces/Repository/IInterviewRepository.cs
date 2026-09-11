@@ -1,6 +1,6 @@
 ﻿using JobTracker.Domain.Entities;
 
-namespace JobTracker.Application.Interfaces
+namespace JobTracker.Application.Interfaces.Repository
 {
     public interface IInterviewRepository
     {
@@ -9,5 +9,6 @@ namespace JobTracker.Application.Interfaces
         Task CreateAsync(Interview interview);
         Task UpdateAsync(Interview interview);
         Task DeleteAsync(Interview interview);
+        Task<List<Interview>> GetAllByUserIdAsync(long userId);
     }
 }

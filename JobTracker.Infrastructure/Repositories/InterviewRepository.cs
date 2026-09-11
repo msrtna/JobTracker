@@ -1,4 +1,4 @@
-﻿using JobTracker.Application.Interfaces;
+﻿using JobTracker.Application.Interfaces.Repository;
 using JobTracker.Domain.Entities;
 using JobTracker.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
@@ -41,6 +41,13 @@ namespace JobTracker.Infrastructure.Repositories
         {
             _context.Interviews.Remove(interview);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<List<Interview>> GetAllByUserIdAsync(long userId)
+        {
+            return await _context.Interviews
+                .Where(x => x.JobApplication.UserId == userId)
+                .ToListAsync();
         }
     }
 }

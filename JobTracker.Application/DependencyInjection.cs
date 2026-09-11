@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 using FluentValidation;
-using JobTracker.Application.Interfaces;
+using JobTracker.Application.Interfaces.Service;
 using JobTracker.Application.Services;
 using Microsoft.Extensions.DependencyInjection;
 

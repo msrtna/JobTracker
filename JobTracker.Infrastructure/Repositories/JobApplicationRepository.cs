@@ -1,4 +1,4 @@
-﻿using JobTracker.Application.Interfaces;
+﻿using JobTracker.Application.Interfaces.Repository;
 using JobTracker.Domain.Entities;
 using JobTracker.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
@@ -46,6 +46,11 @@ namespace JobTracker.Infrastructure.Repositories
         public async Task<bool> ExistsAsync(long id)
         {
             return await _context.JobApplications.AnyAsync(a => a.Id == id);
+        }
+
+        public async Task<List<JobApplication>> GetAllByUserIdAsync(long userId)
+        {
+            return await _context.JobApplications.Where(a => a.UserId == userId).ToListAsync();
         }
     }
 }

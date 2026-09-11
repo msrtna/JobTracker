@@ -1,11 +1,13 @@
 ﻿using JobTracker.Application.DTOs.InterviewDtos;
-using JobTracker.Application.Interfaces;
+using JobTracker.Application.Interfaces.Service;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JobTracker.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class InterviewController : ControllerBase
     {
         private readonly IInterviewService _service;

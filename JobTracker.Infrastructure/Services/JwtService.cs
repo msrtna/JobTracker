@@ -1,7 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using JobTracker.Application.Interfaces;
+using JobTracker.Application.Interfaces.Service;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 

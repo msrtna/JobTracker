@@ -1,4 +1,4 @@
-﻿using JobTracker.Application.Interfaces;
+﻿using JobTracker.Application.Interfaces.Repository;
 using JobTracker.Domain.Entities;
 using JobTracker.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;

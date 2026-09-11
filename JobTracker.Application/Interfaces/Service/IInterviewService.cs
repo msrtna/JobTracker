@@ -1,6 +1,6 @@
 ﻿using JobTracker.Application.DTOs.InterviewDtos;
 
-namespace JobTracker.Application.Interfaces
+namespace JobTracker.Application.Interfaces.Service
 {
     public interface IInterviewService
     {

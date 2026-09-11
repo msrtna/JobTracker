@@ -1,6 +1,6 @@
 ﻿using JobTracker.Domain.Entities;
 
-namespace JobTracker.Application.Interfaces
+namespace JobTracker.Application.Interfaces.Repository
 {
     public interface IJobCategoryRepository
     {

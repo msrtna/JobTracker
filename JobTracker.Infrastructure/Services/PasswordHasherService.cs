@@ -1,4 +1,4 @@
-﻿using JobTracker.Application.Interfaces;
+﻿using JobTracker.Application.Interfaces.Service;
 using Microsoft.AspNetCore.Identity;
 
 namespace JobTracker.Infrastructure.Services

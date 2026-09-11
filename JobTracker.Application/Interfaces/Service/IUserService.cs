@@ -2,7 +2,7 @@
 using JobTracker.Application.DTOs.AuthDtos.RegisterDtos;
 using JobTracker.Application.DTOs.AuthDtos.UserDtos;
 
-namespace JobTracker.Application.Interfaces
+namespace JobTracker.Application.Interfaces.Service
 {
     public interface IUserService
     {

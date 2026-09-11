@@ -1,6 +1,6 @@
 ﻿using JobTracker.Application.DTOs.CompanyDtos;
 
-namespace JobTracker.Application.Interfaces
+namespace JobTracker.Application.Interfaces.Service
 {
     public interface ICompanyService
     {

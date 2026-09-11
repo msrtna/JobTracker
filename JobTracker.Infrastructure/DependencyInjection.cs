@@ -1,4 +1,5 @@
-﻿using JobTracker.Application.Interfaces;
+﻿using JobTracker.Application.Interfaces.Repository;
+using JobTracker.Application.Interfaces.Service;
 using JobTracker.Infrastructure.Persistence.Context;
 using JobTracker.Infrastructure.Repositories;
 using JobTracker.Infrastructure.Services;
@@ -33,6 +34,11 @@ namespace JobTracker.Infrastructure
 
             // JWT
             services.AddScoped<IJwtService, JwtService>();
+
+            // User Context
+            services.AddHttpContextAccessor();
+            services.AddScoped<IUserContext, UserContext>();
+
 
 
             return services;

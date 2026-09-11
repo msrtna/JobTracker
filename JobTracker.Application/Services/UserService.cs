@@ -3,7 +3,8 @@ using JobTracker.Application.DTOs.AuthDtos.LoginDtos;
 using JobTracker.Application.DTOs.AuthDtos.RegisterDtos;
 using JobTracker.Application.DTOs.AuthDtos.UserDtos;
 using JobTracker.Application.Exceptions;
-using JobTracker.Application.Interfaces;
+using JobTracker.Application.Interfaces.Repository;
+using JobTracker.Application.Interfaces.Service;
 using JobTracker.Domain.Entities;
 
 namespace JobTracker.Application.Services

@@ -9,7 +9,6 @@ namespace JobTracker.Application.DTOs.JobApplicationDtos
         public decimal? Salary { get; set; }
         public long JobCategoryId { get; set; }
         public long CompanyId { get; set; }
-        public long UserId { get; set; }
         public WorkPlace WorkPlace { get; set; }
         public string? JobUrl { get; set; }
         public DateTime? ApplicationDate { get; set; }

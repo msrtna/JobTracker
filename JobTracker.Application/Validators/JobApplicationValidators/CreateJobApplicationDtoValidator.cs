@@ -42,10 +42,6 @@ namespace JobTracker.Application.Validators.JobApplicationValidators
             RuleFor(x => x.CompanyId)
                     .NotEmpty()
                     .WithMessage("Company id is required.");
-
-            RuleFor(x => x.UserId)
-                    .NotEmpty()
-                    .WithMessage("User id is required.");
         }
     }
 }
