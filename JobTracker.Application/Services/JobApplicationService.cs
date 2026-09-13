@@ -53,8 +53,7 @@ namespace JobTracker.Application.Services
             return _mapper.Map<JobApplicationDto>(result);
         }
 
-        public async Task<JobApplicationDto> CreateAsync(
-            CreateJobApplicationDto dto)
+        public async Task<JobApplicationDto> CreateAsync(CreateJobApplicationDto dto)
         {
             if (!await _companyRepository.ExistsAsync(dto.CompanyId))
             {
@@ -77,9 +76,7 @@ namespace JobTracker.Application.Services
             return _mapper.Map<JobApplicationDto>(result);
         }
 
-        public async Task UpdateAsync(
-            long id,
-            UpdateJobApplicationDto dto)
+        public async Task UpdateAsync(long id, UpdateJobApplicationDto dto)
         {
             var userId = _userContext.UserId;
 
