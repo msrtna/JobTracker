@@ -30,5 +30,16 @@ namespace JobTracker.Infrastructure.Repositories
         {
             return await _context.Users.AnyAsync(x => x.Email == email);
         }
+
+        public async Task UpdateAsync(User user)
+        {
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<User?> GetByIdAsync(long id)
+        {
+            return await _context.Users.FirstOrDefaultAsync(i=> i.Id == id);
+        }
     }
 }

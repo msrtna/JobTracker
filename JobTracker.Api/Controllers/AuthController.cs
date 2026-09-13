@@ -1,7 +1,9 @@
-﻿using JobTracker.Application.DTOs.AuthDtos.LoginDtos;
+﻿using JobTracker.Application.DTOs.AuthDtos.ChangePasswordDtos;
+using JobTracker.Application.DTOs.AuthDtos.LoginDtos;
 using JobTracker.Application.DTOs.AuthDtos.RegisterDtos;
 using JobTracker.Application.DTOs.AuthDtos.UserDtos;
 using JobTracker.Application.Interfaces.Service;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JobTracker.Api.Controllers
@@ -22,7 +24,6 @@ namespace JobTracker.Api.Controllers
         public async Task<ActionResult<UserDto>> Register(RegisterDto dto)
         {
             var result = await _userService.RegisterAsync(dto);
-
             return Ok(result);
         }
 
@@ -30,8 +31,15 @@ namespace JobTracker.Api.Controllers
         public async Task<ActionResult<LoginResponseDto>> Login(LoginDto dto)
         {
             var result = await _userService.LoginAsync(dto);
-
             return Ok(result);
+        }
+
+        [Authorize]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword(ChangePasswordDto dto)
+        {
+            await _userService.ChangePasswordAsync(dto);
+            return NoContent();
         }
     }
 }

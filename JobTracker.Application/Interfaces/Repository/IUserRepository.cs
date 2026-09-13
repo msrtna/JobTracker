@@ -7,5 +7,7 @@ namespace JobTracker.Application.Interfaces.Repository
         Task<User?> GetByEmailAsync(string email);
         Task CreateAsync(User user);
         Task<bool> ExistsByEmailAsync(string email);
+        Task UpdateAsync(User user);
+        Task<User?> GetByIdAsync(long id);
     }
 }

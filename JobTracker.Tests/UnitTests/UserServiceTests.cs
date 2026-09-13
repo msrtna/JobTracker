@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using JobTracker.Application.DTOs.AuthDtos.ChangePasswordDtos;
 using JobTracker.Application.DTOs.AuthDtos.LoginDtos;
 using JobTracker.Application.DTOs.AuthDtos.RegisterDtos;
 using JobTracker.Application.DTOs.AuthDtos.UserDtos;
@@ -17,6 +18,7 @@ public class UserServiceTests
     private readonly Mock<IPasswordHasher> _passwordHasherMock = new();
     private readonly Mock<IJwtService> _jwtServiceMock = new();
     private readonly Mock<IMapper> _mapperMock = new();
+    private readonly Mock<IUserContext> _userContextMock = new();
 
     [Fact]
     public async Task RegisterAsync_WhenEmailAlreadyExists_ThrowsConflictException()
@@ -31,7 +33,8 @@ public class UserServiceTests
             _userRepositoryMock.Object,
             _mapperMock.Object,
             _passwordHasherMock.Object,
-            _jwtServiceMock.Object);
+            _jwtServiceMock.Object,
+            _userContextMock.Object);
 
         var dto = new RegisterDto
         {
@@ -90,7 +93,8 @@ public class UserServiceTests
             _userRepositoryMock.Object,
             _mapperMock.Object,
             _passwordHasherMock.Object,
-            _jwtServiceMock.Object);
+            _jwtServiceMock.Object,
+            _userContextMock.Object);
 
         var dto = new RegisterDto
         {
@@ -168,7 +172,8 @@ public class UserServiceTests
             _userRepositoryMock.Object,
             _mapperMock.Object,
             _passwordHasherMock.Object,
-            _jwtServiceMock.Object);
+            _jwtServiceMock.Object,
+            _userContextMock.Object);
 
         var dto = new LoginDto
         {
@@ -225,7 +230,8 @@ public class UserServiceTests
             _userRepositoryMock.Object,
             _mapperMock.Object,
             _passwordHasherMock.Object,
-            _jwtServiceMock.Object);
+            _jwtServiceMock.Object,
+            _userContextMock.Object);
 
         var dto = new LoginDto
         {
@@ -271,7 +277,8 @@ public class UserServiceTests
             _userRepositoryMock.Object,
             _mapperMock.Object,
             _passwordHasherMock.Object,
-            _jwtServiceMock.Object);
+            _jwtServiceMock.Object,
+            _userContextMock.Object);
 
         var dto = new LoginDto
         {
@@ -293,5 +300,210 @@ public class UserServiceTests
             Times.Never);
     }
 
+    [Fact]
+    public async Task ChangePasswordAsync_WithValidData_UpdatesPassword()
+    {
+        // Arrange
+        var user = new User
+        {
+            Id = 1,
+            FirstName = "Test",
+            LastName = "User",
+            Email = "test@example.com",
+            PasswordHash = "old-hashed-password"
+        };
 
+        _userContextMock
+            .Setup(x => x.UserId)
+            .Returns(1);
+
+        _userRepositoryMock
+            .Setup(x => x.GetByIdAsync(1))
+            .ReturnsAsync(user);
+
+        _passwordHasherMock
+            .Setup(x => x.VerifyPassword(
+                "OldPassword123!",
+                "old-hashed-password"))
+            .Returns(true);
+
+        _passwordHasherMock
+            .Setup(x => x.HashPassword("NewPassword123!"))
+            .Returns("new-hashed-password");
+
+        _userRepositoryMock
+            .Setup(x => x.UpdateAsync(It.IsAny<User>()))
+            .Returns(Task.CompletedTask);
+
+        var service = new UserService(
+            _userRepositoryMock.Object,
+            _mapperMock.Object,
+            _passwordHasherMock.Object,
+            _jwtServiceMock.Object,
+            _userContextMock.Object);
+
+        var dto = new ChangePasswordDto
+        {
+            CurrentPassword = "OldPassword123!",
+            NewPassword = "NewPassword123!",
+            ConfirmNewPassword = "NewPassword123!"
+        };
+
+        // Act
+        await service.ChangePasswordAsync(dto);
+
+        // Assert
+        Assert.Equal(
+            "new-hashed-password",
+            user.PasswordHash);
+    }
+
+    [Fact]
+    public async Task ChangePasswordAsync_WhenUserDoesNotExist_ThrowsUnauthorizedException()
+    {
+        // Arrange
+
+        _userContextMock
+            .Setup(x => x.UserId)
+            .Returns(1);
+
+        _userRepositoryMock
+            .Setup(x => x.GetByIdAsync(1))
+            .ReturnsAsync((User?)null);
+
+        var service = new UserService(
+            _userRepositoryMock.Object,
+            _mapperMock.Object,
+            _passwordHasherMock.Object,
+            _jwtServiceMock.Object,
+            _userContextMock.Object);
+
+        var dto = new ChangePasswordDto
+        {
+            CurrentPassword = "OldPassword123!",
+            NewPassword = "NewPassword123!",
+            ConfirmNewPassword = "NewPassword123!"
+        };
+
+        // Act
+
+        var action = async () =>
+            await service.ChangePasswordAsync(dto);
+
+        // Assert
+
+        await Assert.ThrowsAsync<UnauthorizedException>(action);
+    }
+
+    [Fact]
+    public async Task ChangePasswordAsync_WhenCurrentPasswordIsInvalid_ThrowsUnauthorizedException()
+    {
+        // Arrange
+
+        var user = new User
+        {
+            Id = 1,
+            FirstName = "Test",
+            LastName = "User",
+            Email = "test@example.com",
+            PasswordHash = "old-hashed-password"
+        };
+
+        _userContextMock
+            .Setup(x => x.UserId)
+            .Returns(1);
+
+        _userRepositoryMock
+            .Setup(x => x.GetByIdAsync(1))
+            .ReturnsAsync(user);
+
+        _passwordHasherMock
+            .Setup(x => x.VerifyPassword(
+                "WrongPassword123!",
+                "old-hashed-password"))
+            .Returns(false);
+
+        var service = new UserService(
+            _userRepositoryMock.Object,
+            _mapperMock.Object,
+            _passwordHasherMock.Object,
+            _jwtServiceMock.Object,
+            _userContextMock.Object);
+
+        var dto = new ChangePasswordDto
+        {
+            CurrentPassword = "WrongPassword123!",
+            NewPassword = "NewPassword123!",
+            ConfirmNewPassword = "NewPassword123!"
+        };
+
+        // Act
+
+        var action = async () =>
+            await service.ChangePasswordAsync(dto);
+
+        // Assert
+
+        await Assert.ThrowsAsync<UnauthorizedException>(action);
+    }
+
+    [Fact]
+    public async Task ChangePasswordAsync_WhenCurrentPasswordIsInvalid_DoesNotUpdatePassword()
+    {
+        // Arrange
+
+        var user = new User
+        {
+            Id = 1,
+            FirstName = "Test",
+            LastName = "User",
+            Email = "test@example.com",
+            PasswordHash = "old-hashed-password"
+        };
+
+        _userContextMock
+            .Setup(x => x.UserId)
+            .Returns(1);
+
+        _userRepositoryMock
+            .Setup(x => x.GetByIdAsync(1))
+            .ReturnsAsync(user);
+
+        _passwordHasherMock
+            .Setup(x => x.VerifyPassword(
+                "WrongPassword123!",
+                "old-hashed-password"))
+            .Returns(false);
+
+        var service = new UserService(
+            _userRepositoryMock.Object,
+            _mapperMock.Object,
+            _passwordHasherMock.Object,
+            _jwtServiceMock.Object,
+            _userContextMock.Object);
+
+        var dto = new ChangePasswordDto
+        {
+            CurrentPassword = "WrongPassword123!",
+            NewPassword = "NewPassword123!",
+            ConfirmNewPassword = "NewPassword123!"
+        };
+
+        // Act
+
+        var action = async () =>
+            await service.ChangePasswordAsync(dto);
+
+        await Assert.ThrowsAsync<UnauthorizedException>(action);
+
+        // Assert
+
+        _passwordHasherMock.Verify(
+            x => x.HashPassword("NewPassword123!"),
+            Times.Never);
+
+        _userRepositoryMock.Verify(
+            x => x.UpdateAsync(It.IsAny<User>()),
+            Times.Never);
+    }
 }

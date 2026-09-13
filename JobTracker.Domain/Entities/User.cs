@@ -10,5 +10,6 @@ namespace JobTracker.Domain.Entities
         public string PasswordHash { get; set; } = string.Empty;
 
         public ICollection<JobApplication> JobApplications { get; set; } = new List<JobApplication>();
+        public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
     }
 }

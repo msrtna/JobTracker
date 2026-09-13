@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using JobTracker.Application.DTOs.AuthDtos.ChangePasswordDtos;
 using JobTracker.Application.DTOs.AuthDtos.LoginDtos;
 using JobTracker.Application.DTOs.AuthDtos.RegisterDtos;
 using JobTracker.Application.DTOs.AuthDtos.UserDtos;
@@ -15,13 +16,20 @@ namespace JobTracker.Application.Services
         private readonly IMapper _mapper;
         private readonly IPasswordHasher _passwordHasher;
         private readonly IJwtService _jwtService;
+        private readonly IUserContext _userContext;
 
-        public UserService(IUserRepository repository, IMapper mapper, IPasswordHasher passwordHasher, IJwtService jwtService)
+        public UserService(
+                IUserRepository repository,
+                IMapper mapper,
+                IPasswordHasher passwordHasher,
+                IJwtService jwtService,
+                IUserContext userContext)
         {
             _repository = repository;
             _mapper = mapper;
             _passwordHasher = passwordHasher;
             _jwtService = jwtService;
+            _userContext = userContext;
         }
 
 
@@ -74,6 +82,35 @@ namespace JobTracker.Application.Services
                 ExpiresAt = expiration,
                 User = _mapper.Map<UserDto>(user)
             };
+        }
+
+        public async Task ChangePasswordAsync(ChangePasswordDto dto)
+        {
+            var userId = _userContext.UserId;
+
+            var user = await _repository.GetByIdAsync(userId);
+
+            if (user == null)
+            {
+                throw new UnauthorizedException(
+                    "User not found.");
+            }
+
+            var isCurrentPasswordValid =
+                _passwordHasher.VerifyPassword(
+                    dto.CurrentPassword,
+                    user.PasswordHash);
+
+            if (!isCurrentPasswordValid)
+            {
+                throw new UnauthorizedException(
+                    "Current password is incorrect.");
+            }
+
+            user.PasswordHash =
+                _passwordHasher.HashPassword(dto.NewPassword);
+
+            await _repository.UpdateAsync(user);
         }
     }
 }
