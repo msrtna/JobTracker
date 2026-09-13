@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using JobTracker.Application.DTOs.AuthDtos.ChangePasswordDtos;
 using JobTracker.Application.DTOs.AuthDtos.LoginDtos;
+using JobTracker.Application.DTOs.AuthDtos.RefreshTokenDtos;
 using JobTracker.Application.DTOs.AuthDtos.RegisterDtos;
 using JobTracker.Application.DTOs.AuthDtos.UserDtos;
 using JobTracker.Application.Exceptions;
@@ -17,19 +18,25 @@ namespace JobTracker.Application.Services
         private readonly IPasswordHasher _passwordHasher;
         private readonly IJwtService _jwtService;
         private readonly IUserContext _userContext;
+        private readonly IRefreshTokenRepository _refreshTokenRepository;
+        private readonly IRefreshTokenService _refreshTokenService;
 
         public UserService(
                 IUserRepository repository,
                 IMapper mapper,
                 IPasswordHasher passwordHasher,
                 IJwtService jwtService,
-                IUserContext userContext)
+                IUserContext userContext,
+                IRefreshTokenRepository refreshTokenRepository,
+                IRefreshTokenService refreshTokenService)
         {
             _repository = repository;
             _mapper = mapper;
             _passwordHasher = passwordHasher;
             _jwtService = jwtService;
             _userContext = userContext;
+            _refreshTokenRepository = refreshTokenRepository;
+            _refreshTokenService = refreshTokenService;
         }
 
 
@@ -70,16 +77,34 @@ namespace JobTracker.Application.Services
                     "Invalid email or password.");
             }
 
-            var token = _jwtService.GenerateToken(
+            var accessToken = _jwtService.GenerateToken(
                 user.Id,
                 user.Email);
 
-            var expiration = _jwtService.GetExpiration();
+            var accessTokenExpiration =
+                _jwtService.GetExpiration();
+
+            var refreshToken =
+                _refreshTokenService.GenerateToken();
+
+            var refreshTokenHash =
+                _refreshTokenService.HashToken(refreshToken);
+
+            var refreshTokenEntity = new RefreshToken
+            {
+                UserId = user.Id,
+                TokenHash = refreshTokenHash,
+                ExpiresAt = _refreshTokenService.GetExpiration()
+            };
+
+            await _refreshTokenRepository.AddAsync(
+                refreshTokenEntity);
 
             return new LoginResponseDto
             {
-                Token = token,
-                ExpiresAt = expiration,
+                AccessToken = accessToken,
+                RefreshToken = refreshToken,
+                ExpiresAt = accessTokenExpiration,
                 User = _mapper.Map<UserDto>(user)
             };
         }
@@ -111,6 +136,88 @@ namespace JobTracker.Application.Services
                 _passwordHasher.HashPassword(dto.NewPassword);
 
             await _repository.UpdateAsync(user);
+        }
+
+        public async Task<LoginResponseDto> RefreshAsync(RefreshTokenRequestDto dto)
+        {
+            var tokenHash =
+                _refreshTokenService.HashToken(
+                    dto.RefreshToken);
+
+            var refreshToken =
+                await _refreshTokenRepository
+                    .GetByTokenHashAsync(tokenHash);
+
+            if (refreshToken == null)
+            {
+                throw new UnauthorizedException(
+                    "Invalid refresh token.");
+            }
+
+            if (refreshToken.RevokedAt.HasValue)
+            {
+                throw new UnauthorizedException(
+                    "Refresh token has been revoked.");
+            }
+
+            if (refreshToken.ExpiresAt <= DateTime.UtcNow)
+            {
+                throw new UnauthorizedException(
+                    "Refresh token has expired.");
+            }
+
+            var user =
+                await _repository
+                    .GetByIdAsync(refreshToken.UserId);
+
+            if (user == null)
+            {
+                throw new UnauthorizedException(
+                    "User not found.");
+            }
+
+            var newAccessToken =
+                _jwtService.GenerateToken(
+                    user.Id,
+                    user.Email);
+
+            var newAccessTokenExpiration =
+                _jwtService.GetExpiration();
+
+            var newRefreshToken =
+                _refreshTokenService.GenerateToken();
+
+            var newRefreshTokenHash =
+                _refreshTokenService.HashToken(
+                    newRefreshToken);
+
+            refreshToken.RevokedAt =
+                DateTime.UtcNow;
+
+            refreshToken.ReplacedByTokenHash =
+                newRefreshTokenHash;
+
+            await _refreshTokenRepository
+                .UpdateAsync(refreshToken);
+
+            var newRefreshTokenEntity = new RefreshToken
+            {
+                UserId = user.Id,
+                TokenHash = newRefreshTokenHash,
+                ExpiresAt =
+                    _refreshTokenService.GetExpiration()
+            };
+
+            await _refreshTokenRepository
+                .AddAsync(newRefreshTokenEntity);
+
+            return new LoginResponseDto
+            {
+                AccessToken = newAccessToken,
+                RefreshToken = newRefreshToken,
+                ExpiresAt = newAccessTokenExpiration,
+                User = _mapper.Map<UserDto>(user)
+            };
         }
     }
 }

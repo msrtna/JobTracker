@@ -1,5 +1,6 @@
 ﻿using JobTracker.Application.DTOs.AuthDtos.ChangePasswordDtos;
 using JobTracker.Application.DTOs.AuthDtos.LoginDtos;
+using JobTracker.Application.DTOs.AuthDtos.RefreshTokenDtos;
 using JobTracker.Application.DTOs.AuthDtos.RegisterDtos;
 using JobTracker.Application.DTOs.AuthDtos.UserDtos;
 using JobTracker.Application.Interfaces.Service;
@@ -31,6 +32,14 @@ namespace JobTracker.Api.Controllers
         public async Task<ActionResult<LoginResponseDto>> Login(LoginDto dto)
         {
             var result = await _userService.LoginAsync(dto);
+            return Ok(result);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("refresh")]
+        public async Task<ActionResult<LoginResponseDto>> Refresh(RefreshTokenRequestDto dto)
+        {
+            var result = await _userService.RefreshAsync(dto);
             return Ok(result);
         }
 
