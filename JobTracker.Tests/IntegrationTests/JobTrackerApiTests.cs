@@ -6,6 +6,7 @@ using JobTracker.Application.DTOs.AuthDtos.LoginDtos;
 using JobTracker.Application.DTOs.AuthDtos.RegisterDtos;
 using JobTracker.Application.DTOs.Common;
 using JobTracker.Application.DTOs.CompanyDtos;
+using JobTracker.Application.DTOs.DashboardDtos;
 using JobTracker.Application.DTOs.InterviewDtos;
 using JobTracker.Application.DTOs.JobApplicationDtos;
 using JobTracker.Application.DTOs.JobCategoryDtos;
@@ -2860,6 +2861,220 @@ namespace JobTracker.Tests.IntegrationTests
                 await _client.PostAsJsonAsync(
                     "/api/Auth/change-password",
                     dto);
+
+            // Assert
+            Assert.Equal(
+                HttpStatusCode.Unauthorized,
+                response.StatusCode);
+        }
+
+        [Fact]
+        public async Task GetDashboard_WithValidToken_ReturnsUserStatistics()
+        {
+            // Arrange
+            var registerDto = new RegisterDto
+            {
+                FirstName = "Dashboard",
+                LastName = "Test",
+                Email = $"dashboard{Guid.NewGuid()}@example.com",
+                Password = "Password123!"
+            };
+
+            var registerResponse =
+                await _client.PostAsJsonAsync(
+                    "/api/Auth/register",
+                    registerDto);
+
+            Assert.Equal(
+                HttpStatusCode.OK,
+                registerResponse.StatusCode);
+
+            var loginResponse =
+                await _client.PostAsJsonAsync(
+                    "/api/Auth/login",
+                    new LoginDto
+                    {
+                        Email = registerDto.Email,
+                        Password = registerDto.Password
+                    });
+
+            Assert.Equal(
+                HttpStatusCode.OK,
+                loginResponse.StatusCode);
+
+            var loginResult =
+                await loginResponse.Content
+                    .ReadFromJsonAsync<LoginResponseDto>();
+
+            Assert.NotNull(loginResult);
+
+            _client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue(
+                    "Bearer",
+                    loginResult!.AccessToken);
+
+            // Create Job Application
+            var createApplicationResponse =
+                await _client.PostAsJsonAsync(
+                    "/api/JobApplication",
+                    new CreateJobApplicationDto
+                    {
+                        Location = "Baku",
+                        Position = "Backend Developer",
+                        Salary = 3000,
+                        JobCategoryId = 1,
+                        CompanyId = 1,
+                        WorkPlace = WorkPlace.Remote,
+                        ApplicationDate = DateTime.UtcNow,
+                        Status = JobApplicationStatus.Applied,
+                        Description = "Dashboard test"
+                    });
+
+            Assert.Equal(
+                HttpStatusCode.Created,
+                createApplicationResponse.StatusCode);
+
+            // Act
+            var dashboardResponse =
+                await _client.GetAsync("/api/Dashboard");
+
+            // Assert
+            Assert.Equal(
+                HttpStatusCode.OK,
+                dashboardResponse.StatusCode);
+
+            var dashboard =
+                await dashboardResponse.Content
+                    .ReadFromJsonAsync<DashboardDto>();
+
+            Assert.NotNull(dashboard);
+
+            Assert.Equal(1, dashboard!.TotalApplications);
+            Assert.Equal(1, dashboard.Applied);
+            Assert.Equal(1, dashboard.Remote);
+
+            Assert.Equal(0, dashboard.Saved);
+            Assert.Equal(0, dashboard.Interviews);
+            Assert.Equal(0, dashboard.Offers);
+            Assert.Equal(0, dashboard.Rejected);
+            Assert.Equal(0, dashboard.Withdrawn);
+            Assert.Equal(0, dashboard.Hybrid);
+            Assert.Equal(0, dashboard.OnSite);
+        }
+
+        [Fact]
+        public async Task GetDashboard_ReturnsOnlyCurrentUsersStatistics()
+        {
+            // Arrange - User 1
+            var user1 = new RegisterDto
+            {
+                FirstName = "User",
+                LastName = "One",
+                Email = $"dashboard-user1-{Guid.NewGuid()}@example.com",
+                Password = "Password123!"
+            };
+
+            await _client.PostAsJsonAsync(
+                "/api/Auth/register",
+                user1);
+
+            var login1Response = await _client.PostAsJsonAsync(
+                "/api/Auth/login",
+                new LoginDto
+                {
+                    Email = user1.Email,
+                    Password = user1.Password
+                });
+
+            var login1 =
+                await login1Response.Content
+                    .ReadFromJsonAsync<LoginResponseDto>();
+
+            _client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue(
+                    "Bearer",
+                    login1!.AccessToken);
+
+            // User 1 creates an application
+            var applicationResponse = await _client.PostAsJsonAsync(
+                "/api/JobApplication",
+                new CreateJobApplicationDto
+                {
+                    Location = "Baku",
+                    Position = "Backend Developer",
+                    Salary = 3000,
+                    JobCategoryId = 1,
+                    CompanyId = 1,
+                    WorkPlace = WorkPlace.Remote,
+                    ApplicationDate = DateTime.UtcNow,
+                    Status = JobApplicationStatus.Applied
+                });
+
+            Assert.Equal(
+                HttpStatusCode.Created,
+                applicationResponse.StatusCode);
+
+            // Arrange - User 2
+            var user2 = new RegisterDto
+            {
+                FirstName = "User",
+                LastName = "Two",
+                Email = $"dashboard-user2-{Guid.NewGuid()}@example.com",
+                Password = "Password123!"
+            };
+
+            await _client.PostAsJsonAsync(
+                "/api/Auth/register",
+                user2);
+
+            var login2Response = await _client.PostAsJsonAsync(
+                "/api/Auth/login",
+                new LoginDto
+                {
+                    Email = user2.Email,
+                    Password = user2.Password
+                });
+
+            var login2 =
+                await login2Response.Content
+                    .ReadFromJsonAsync<LoginResponseDto>();
+
+            _client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue(
+                    "Bearer",
+                    login2!.AccessToken);
+
+            // Act
+            var dashboardResponse =
+                await _client.GetAsync("/api/Dashboard");
+
+            // Assert
+            Assert.Equal(
+                HttpStatusCode.OK,
+                dashboardResponse.StatusCode);
+
+            var dashboard =
+                await dashboardResponse.Content
+                    .ReadFromJsonAsync<DashboardDto>();
+
+            Assert.NotNull(dashboard);
+
+            // User 2 has no applications.
+            // User 1's application must not appear here.
+            Assert.Equal(0, dashboard!.TotalApplications);
+            Assert.Equal(0, dashboard.Applied);
+            Assert.Equal(0, dashboard.Remote);
+        }
+
+        [Fact]
+        public async Task GetDashboard_WithoutAuthentication_ReturnsUnauthorized()
+        {
+            // Arrange
+            _client.DefaultRequestHeaders.Authorization = null;
+
+            // Act
+            var response =
+                await _client.GetAsync("/api/Dashboard");
 
             // Assert
             Assert.Equal(

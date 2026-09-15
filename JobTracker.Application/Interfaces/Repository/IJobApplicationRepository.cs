@@ -1,4 +1,5 @@
 ﻿using JobTracker.Application.DTOs.Common;
+using JobTracker.Application.DTOs.DashboardDtos;
 using JobTracker.Application.DTOs.JobApplicationDtos;
 using JobTracker.Domain.Entities;
 
@@ -13,5 +14,6 @@ namespace JobTracker.Application.Interfaces.Repository
         Task DeleteAsync(JobApplication jobApplication);
         Task<bool> ExistsAsync(long id);
         Task<PagedResultDto<JobApplication>> GetAllByUserIdAsync(long userId, JobApplicationQueryDto query);
+        Task<DashboardDto> GetDashboardAsync(long userId);
     }
 }

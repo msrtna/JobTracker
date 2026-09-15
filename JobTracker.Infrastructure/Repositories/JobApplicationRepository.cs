@@ -1,7 +1,9 @@
 ﻿using JobTracker.Application.DTOs.Common;
+using JobTracker.Application.DTOs.DashboardDtos;
 using JobTracker.Application.DTOs.JobApplicationDtos;
 using JobTracker.Application.Interfaces.Repository;
 using JobTracker.Domain.Entities;
+using JobTracker.Domain.Enums;
 using JobTracker.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 
@@ -143,6 +145,47 @@ namespace JobTracker.Infrastructure.Repositories
                 PageNumber = pageNumber,
                 PageSize = pageSize,
                 TotalCount = totalCount
+            };
+        }
+
+        public async Task<DashboardDto> GetDashboardAsync(long userId)
+        {
+            var applications = _context.JobApplications
+                .AsNoTracking()
+                .Where(x => x.UserId == userId);
+
+            return new DashboardDto
+            {
+                TotalApplications = await applications.CountAsync(),
+
+                Saved = await applications.CountAsync(
+                    x => x.Status == JobApplicationStatus.Saved),
+
+                Applied = await applications.CountAsync(
+                    x => x.Status == JobApplicationStatus.Applied),
+
+                Interviews = await applications.CountAsync(
+                    x => x.Status == JobApplicationStatus.TechnicalInterview ||
+                         x.Status == JobApplicationStatus.HRScreening ||
+                         x.Status == JobApplicationStatus.FinalInterview),
+
+                Offers = await applications.CountAsync(
+                    x => x.Status == JobApplicationStatus.Offer),
+
+                Rejected = await applications.CountAsync(
+                    x => x.Status == JobApplicationStatus.Rejected),
+
+                Withdrawn = await applications.CountAsync(
+                    x => x.Status == JobApplicationStatus.Withdrawn),
+
+                Remote = await applications.CountAsync(
+                    x => x.WorkPlace == WorkPlace.Remote),
+
+                Hybrid = await applications.CountAsync(
+                    x => x.WorkPlace == WorkPlace.Hybrid),
+
+                OnSite = await applications.CountAsync(
+                    x => x.WorkPlace == WorkPlace.OnSite)
             };
         }
     }

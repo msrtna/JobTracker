@@ -26,6 +26,7 @@ namespace JobTracker.Application
             services.AddScoped<IInterviewService, InterviewService>();
             services.AddScoped<IJobApplicationService, JobApplicationService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IDashboardService, DashboardService>();
 
 
             return services;
