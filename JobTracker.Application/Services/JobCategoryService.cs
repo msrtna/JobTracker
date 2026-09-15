@@ -30,6 +30,7 @@ namespace JobTracker.Application.Services
             var result = await _repository.GetByIdAsync(id);
             if (result == null)
                 throw new NotFoundException($"JobCategory with id {id} was not found.");
+
             return _mapper.Map<JobCategoryDto>(result);
         }
 

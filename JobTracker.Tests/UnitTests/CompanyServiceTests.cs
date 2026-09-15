@@ -72,6 +72,10 @@ namespace JobTracker.Tests.UnitTests
             _companyRepositoryMock.Verify(
                 x => x.GetAllAsync(),
                 Times.Once);
+
+            _mapperMock.Verify(
+                x => x.Map<List<CompanyDto>>(company),
+                Times.Once);
         }
 
         [Fact]
@@ -385,11 +389,11 @@ namespace JobTracker.Tests.UnitTests
                 .ReturnsAsync(company);
 
             _companyRepositoryMock
-                .Setup(x => x.ExistsByNameAsync("New Test", 1))
+                .Setup(x => x.ExistsByNameAsync(updateCompanyDto.Name, 1))
                 .ReturnsAsync(false);
 
             _companyRepositoryMock
-                .Setup(x => x.ExistsByWebsiteAsync("https://newtest.com", 1))
+                .Setup(x => x.ExistsByWebsiteAsync(updateCompanyDto.Website, 1))
                 .ReturnsAsync(false);
 
             _mapperMock
@@ -476,7 +480,7 @@ namespace JobTracker.Tests.UnitTests
         }
 
         [Fact]
-        public async Task UpdateCompanyAsync_CompanyNameExists_ThrowsConflictException()
+        public async Task UpdateAsync_CompanyNameExists_ThrowsConflictException()
         {
             // Arrange
             var company = new Company
@@ -534,7 +538,7 @@ namespace JobTracker.Tests.UnitTests
         }
 
         [Fact]
-        public async Task UpdateCompanyAsync_CompanyWebsiteExists_ThrowsConflictException()
+        public async Task UpdateAsync_CompanyWebsiteExists_ThrowsConflictException()
         {
             // Arrange
             var company = new Company
