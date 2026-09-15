@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using JobTracker.Application.DTOs.AuthDtos.ChangePasswordDtos;
 using JobTracker.Application.DTOs.AuthDtos.LoginDtos;
 using JobTracker.Application.DTOs.AuthDtos.RegisterDtos;
 using JobTracker.Application.DTOs.Common;
@@ -2740,6 +2741,130 @@ namespace JobTracker.Tests.IntegrationTests
             Assert.Equal(
                 JobApplicationStatus.Applied,
                 result.Items[0].Status);
+        }
+
+        [Fact]
+        public async Task ChangePassword_WithValidData_AllowsLoginWithNewPassword()
+        {
+            // Arrange
+            var registerDto = new RegisterDto
+            {
+                FirstName = "Change",
+                LastName = "Password",
+                Email = $"changepassword{Guid.NewGuid()}@example.com",
+                Password = "OldPassword123!"
+            };
+
+            var registerResponse =
+                await _client.PostAsJsonAsync(
+                    "/api/Auth/register",
+                    registerDto);
+
+            Assert.Equal(
+                HttpStatusCode.OK,
+                registerResponse.StatusCode);
+
+            var loginResponse =
+                await _client.PostAsJsonAsync(
+                    "/api/Auth/login",
+                    new LoginDto
+                    {
+                        Email = registerDto.Email,
+                        Password = registerDto.Password
+                    });
+
+            Assert.Equal(
+                HttpStatusCode.OK,
+                loginResponse.StatusCode);
+
+            var loginResult =
+                await loginResponse.Content
+                    .ReadFromJsonAsync<LoginResponseDto>();
+
+            Assert.NotNull(loginResult);
+
+            _client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue(
+                    "Bearer",
+                    loginResult!.AccessToken);
+
+            // Act
+            var changePasswordResponse =
+                await _client.PostAsJsonAsync(
+                    "/api/Auth/change-password",
+                    new ChangePasswordDto
+                    {
+                        CurrentPassword = "OldPassword123!",
+                        NewPassword = "NewPassword123!",
+                        ConfirmNewPassword = "NewPassword123!"
+                    });
+
+            // Assert
+            Assert.Equal(
+                HttpStatusCode.NoContent,
+                changePasswordResponse.StatusCode);
+
+            // Login with old password must fail
+            var oldPasswordLoginResponse =
+                await _client.PostAsJsonAsync(
+                    "/api/Auth/login",
+                    new LoginDto
+                    {
+                        Email = registerDto.Email,
+                        Password = "OldPassword123!"
+                    });
+
+            Assert.Equal(
+                HttpStatusCode.Unauthorized,
+                oldPasswordLoginResponse.StatusCode);
+
+            // Login with new password must succeed
+            var newPasswordLoginResponse =
+                await _client.PostAsJsonAsync(
+                    "/api/Auth/login",
+                    new LoginDto
+                    {
+                        Email = registerDto.Email,
+                        Password = "NewPassword123!"
+                    });
+
+            Assert.Equal(
+                HttpStatusCode.OK,
+                newPasswordLoginResponse.StatusCode);
+
+            var newLoginResult =
+                await newPasswordLoginResponse.Content
+                    .ReadFromJsonAsync<LoginResponseDto>();
+
+            Assert.NotNull(newLoginResult);
+            Assert.False(
+                string.IsNullOrWhiteSpace(
+                    newLoginResult!.AccessToken));
+        }
+
+        [Fact]
+        public async Task ChangePassword_WithoutAuthentication_ReturnsUnauthorized()
+        {
+            // Arrange
+            _client.DefaultRequestHeaders.Authorization = null;
+
+            var dto = new ChangePasswordDto
+            {
+                CurrentPassword = "OldPassword123!",
+                NewPassword = "NewPassword123!",
+                ConfirmNewPassword = "NewPassword123!"
+            };
+
+            // Act
+            var response =
+                await _client.PostAsJsonAsync(
+                    "/api/Auth/change-password",
+                    dto);
+
+            // Assert
+            Assert.Equal(
+                HttpStatusCode.Unauthorized,
+                response.StatusCode);
         }
     }
 }
