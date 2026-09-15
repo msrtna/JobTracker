@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using JobTracker.Application.DTOs.Common;
 using JobTracker.Application.DTOs.JobApplicationDtos;
 using JobTracker.Application.Exceptions;
 using JobTracker.Application.Interfaces.Repository;
@@ -29,13 +30,19 @@ namespace JobTracker.Application.Services
             _userContext = userContext;
         }
 
-        public async Task<List<JobApplicationDto>> GetAllAsync()
+        public async Task<PagedResultDto<JobApplicationDto>> GetAllAsync(JobApplicationQueryDto query)
         {
             var userId = _userContext.UserId;
 
-            var result = await _repository.GetAllByUserIdAsync(userId);
+            var result = await _repository.GetAllByUserIdAsync(userId, query);
 
-            return _mapper.Map<List<JobApplicationDto>>(result);
+            return new PagedResultDto<JobApplicationDto>
+            {
+                Items = _mapper.Map<List<JobApplicationDto>>(result.Items),
+                PageNumber = result.PageNumber,
+                PageSize = result.PageSize,
+                TotalCount = result.TotalCount
+            };
         }
 
         public async Task<JobApplicationDto?> GetByIdAsync(long id)

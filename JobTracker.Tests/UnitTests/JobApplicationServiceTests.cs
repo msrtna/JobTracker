@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using JobTracker.Application.DTOs.Common;
 using JobTracker.Application.DTOs.JobApplicationDtos;
 using JobTracker.Application.Exceptions;
 using JobTracker.Application.Interfaces.Repository;
@@ -24,20 +25,34 @@ namespace JobTracker.Tests.UnitTests
             // Arrange
             var userId = 1L;
 
-            var applications = new List<JobApplication>
+            var query = new JobApplicationQueryDto
             {
-                new JobApplication
-                {
-                    Id = 1,
-                    UserId = userId,
-                    Position = "Backend Developer"
-                },
-                new JobApplication
-                {
-                    Id = 2,
-                    UserId = userId,
-                    Position = "C# Developer"
-                }
+                PageNumber = 1,
+                PageSize = 10
+            };
+
+            var applications = new List<JobApplication>
+    {
+        new JobApplication
+        {
+            Id = 1,
+            UserId = userId,
+            Position = "Backend Developer"
+        },
+        new JobApplication
+        {
+            Id = 2,
+            UserId = userId,
+            Position = "C# Developer"
+        }
+    };
+
+            var pagedResult = new PagedResultDto<JobApplication>
+            {
+                Items = applications,
+                PageNumber = 1,
+                PageSize = 10,
+                TotalCount = 2
             };
 
             _userContextMock
@@ -45,24 +60,24 @@ namespace JobTracker.Tests.UnitTests
                 .Returns(userId);
 
             _repositoryMock
-                .Setup(x => x.GetAllByUserIdAsync(userId))
-                .ReturnsAsync(applications);
+                .Setup(x => x.GetAllByUserIdAsync(userId, query))
+                .ReturnsAsync(pagedResult);
 
             var dtoList = new List<JobApplicationDto>
-            {
-                new JobApplicationDto
-                {
-                    Id = 1,
-                    UserId = userId,
-                    Position = "Backend Developer"
-                },
-                new JobApplicationDto
-                {
-                    Id = 2,
-                    UserId = userId,
-                    Position = "C# Developer"
-                }
-            };
+    {
+        new JobApplicationDto
+        {
+            Id = 1,
+            UserId = userId,
+            Position = "Backend Developer"
+        },
+        new JobApplicationDto
+        {
+            Id = 2,
+            UserId = userId,
+            Position = "C# Developer"
+        }
+    };
 
             _mapperMock
                 .Setup(x => x.Map<List<JobApplicationDto>>(applications))
@@ -76,15 +91,22 @@ namespace JobTracker.Tests.UnitTests
                 _userContextMock.Object);
 
             // Act
-            var result = await service.GetAllAsync();
+            var result = await service.GetAllAsync(query);
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(2, result.Count);
-            Assert.All(result, x => Assert.Equal(userId, x.UserId));
+            Assert.Equal(2, result.Items.Count);
+            Assert.Equal(1, result.PageNumber);
+            Assert.Equal(10, result.PageSize);
+            Assert.Equal(2, result.TotalCount);
+            Assert.Equal(1, result.TotalPages);
+
+            Assert.All(
+                result.Items,
+                x => Assert.Equal(userId, x.UserId));
 
             _repositoryMock.Verify(
-                x => x.GetAllByUserIdAsync(userId),
+                x => x.GetAllByUserIdAsync(userId, query),
                 Times.Once);
 
             _mapperMock.Verify(

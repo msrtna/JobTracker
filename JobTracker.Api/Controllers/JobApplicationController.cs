@@ -18,9 +18,9 @@ namespace JobTracker.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] JobApplicationQueryDto query)
         {
-            var result = await _service.GetAllAsync();
+            var result = await _service.GetAllAsync(query);
             return Ok(result);
         }
 
