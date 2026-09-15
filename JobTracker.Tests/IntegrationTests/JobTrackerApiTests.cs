@@ -967,5 +967,33 @@ namespace JobTracker.Tests.IntegrationTests
                 HttpStatusCode.Unauthorized,
                 response.StatusCode);
         }
+
+        [Fact]
+        public async Task GetCompanies_WithoutAuthentication_ReturnsUnauthorized()
+        {
+            _client.DefaultRequestHeaders.Authorization = null;
+
+            var response = await _client.GetAsync(
+                "/api/Company");
+
+            Assert.Equal(
+                HttpStatusCode.Unauthorized,
+                response.StatusCode);
+        }
+
+        [Fact]
+        public async Task GetJobCategories_WithoutAuthentication_ReturnsUnauthorized()
+        {
+            _client.DefaultRequestHeaders.Authorization = null;
+
+            var response = await _client.GetAsync(
+                "/api/JobCategory");
+
+            Assert.Equal(
+                HttpStatusCode.Unauthorized,
+                response.StatusCode);
+        }
+
+
     }
 }
