@@ -59,8 +59,7 @@ namespace JobTracker.Application.Services
             return _mapper.Map<InterviewDto>(result);
         }
 
-        public async Task<InterviewDto> CreateAsync(
-            CreateInterviewDto dto)
+        public async Task<InterviewDto> CreateAsync(CreateInterviewDto dto)
         {
             var userId = _userContext.UserId;
 
@@ -82,9 +81,7 @@ namespace JobTracker.Application.Services
             return _mapper.Map<InterviewDto>(result);
         }
 
-        public async Task UpdateAsync(
-            long id,
-            UpdateInterviewDto dto)
+        public async Task UpdateAsync(long id, UpdateInterviewDto dto)
         {
             var userId = _userContext.UserId;
 

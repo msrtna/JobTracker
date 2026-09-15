@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using JobTracker.Application.DTOs.CompanyDtos;
 using JobTracker.Application.DTOs.JobCategoryDtos;
 using JobTracker.Application.Exceptions;
 using JobTracker.Application.Interfaces.Repository;
