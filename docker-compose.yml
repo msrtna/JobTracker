@@ -1,0 +1,26 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: jobtracker-sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "JobTrackerSqlServer123!"
+    ports:
+      - "1434:1433"
+    volumes:
+      - jobtracker-sqlserver-data:/var/opt/mssql
+
+  api:
+    build: .
+    container_name: jobtracker-api
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      Jwt__SecretKey: "JobTracker-Development-Secret-Key-At-Least-32-Characters!"
+      ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=JobTrackerDb;User Id=sa;Password=JobTrackerSqlServer123!;TrustServerCertificate=True;"
+    depends_on:
+      - sqlserver
+
+volumes:
+  jobtracker-sqlserver-data:
